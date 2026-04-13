@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>どれがマーモット？</title>
+<style>
+body { text-align:center; font-family:sans-serif; overflow:hidden; background:#fafafa;}
+#card {
+  width:80%;
+  max-width:300px;
+  margin:30px auto;
+  border-radius:15px;
+  overflow:hidden;
+  touch-action:none;
+  box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+img { width:100%; display:block; }
+#result { font-size:22px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<h2 id="question">どれがマーモット？（1/5）</h2>
+
+<div id="card">
+  <img id="animalImg">
+</div>
+
+<p>← マーモット　｜　違う →</p>
+<p id="result"></p>
+<p id="score"></p>
+
+<!-- 音 -->
+<audio id="correctSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio id="wrongSound" src="https://www.soundjay.com/buttons/sounds/button-10.mp3"></audio>
+
+<script>
+const animals = [
+  // 正解
+  {name:"marmot", img:"https://upload.wikimedia.org/wikipedia/commons/6/6b/Marmot-edit1.jpg"},
+
+  // ひっかけ（似てる系）
+  {name:"wombat", img:"https://upload.wikimedia.org/wikipedia/commons/5/5c/Wombat_2.jpg"},
+  {name:"beaver", img:"https://upload.wikimedia.org/wikipedia/commons/6/6b/American_Beaver.jpg"},
+  {name:"prairie_dog", img:"https://upload.wikimedia.org/wikipedia/commons/1/1c/Prairie_dog.jpg"},
+  {name:"groundhog", img:"https://upload.wikimedia.org/wikipedia/commons/3/3d/Groundhog.jpg"}
+];
+
+let current = 0;
+let total = 7;
+let score = 0;
+let correctAnimal;
+
+const img = document.getElementById("animalImg");
+const card = document.getElementById("card");
+
+function nextQuestion(){
+  if(current >= total){
+    document.body.innerHTML =
+      `<h2>結果発表！</h2>
+       <p>${score} / ${total} 正解！</p>
+       <button onclick="location.reload()">もう一回</button>`;
+    return;
+  }
+
+  document.getElementById("result").innerText = "";
+
+  const rand = animals[Math.floor(Math.random()*animals.length)];
+  correctAnimal = rand.name;
+  img.src = rand.img;
+
+  document.getElementById("question").innerText =
+    `どれがマーモット？（${current+1}/${total}）`;
+
+  current++;
+}
+
+let startX = 0;
+
+card.addEventListener("touchstart", e => {
+  startX = e.touches[0].clientX;
+});
+
+card.addEventListener("touchend", e => {
+  let endX = e.changedTouches[0].clientX;
+  let diff = endX - startX;
+
+  if(Math.abs(diff) < 50) return;
+
+  let correct = false;
+
+  if(diff < 0){
+    // YES
+    correct = (correctAnimal === "marmot");
+  } else {
+    // NO
+    correct = (correctAnimal !== "marmot");
+  }
+
+  if(correct){
+    score++;
+    document.getElementById("result").innerText = "正解！🎉";
+    document.getElementById("correctSound").play();
+  } else {
+    document.getElementById("result").innerText = "残念！😂";
+    document.getElementById("wrongSound").play();
+  }
+
+  document.getElementById("score").innerText = "スコア: " + score;
+
+  setTimeout(nextQuestion, 800);
+});
+
+nextQuestion();
+</script>
+
+</body>
+</html>
